@@ -11,29 +11,25 @@
    "name"      common/desc-by-last-name})
 
 (def sort-options-validation-msg
-  (str "Sort options: " (strings/join ", " (map name (keys sort-options)))))
+  (str "Choose: " (strings/join ", " (map name (keys sort-options)))))
 
 (def cli-options
-  [["-f" "--files <files>"
-    :parse-fn #(set (strings/split % #"\s*,\s*"))
+  [["-f" "--files <files>" "Example: file1.csv,file2.psv,file3.ssv"
+    :parse-fn #(set (strings/split % #","))
     :default #{}]
-   ["-s" "--sort  <sort>"
+   ["-s" "--sort  <sort>" sort-options-validation-msg
     :default "name"
     :validate [sort-options sort-options-validation-msg]]
    ["-h" "--help"]])
 
 (defn usage [options-summary]
-  (->> ["Recordsets"
-        ""
-        "Options:"
-        options-summary]
-       (strings/join \newline)))
+  (strings/join \newline [(slurp (io/resource "preamble.txt")) "Options:" options-summary]))
 
 (defn error-message [errors]
   (str "Errors encountered parsing your command:" \newline (strings/join \newline errors)))
 
 (defn record->table-row [record]
-  (let [cells      (for [[k v] common/headers]
+  (let [cells      (for [[k v] common/attributes]
                      ((:output v identity) (get record k)))
         fmt-string (strings/join "" (repeat (count cells) "%-15s"))]
     (apply format fmt-string cells)))

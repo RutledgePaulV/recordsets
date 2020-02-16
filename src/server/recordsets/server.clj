@@ -1,12 +1,12 @@
 (ns recordsets.server
   (:require [ring.adapter.jetty :as jetty]
             [recordsets.common :as common]
-            [cheshire.core :as json]
             [ring.util.response :as response]
+            [cheshire.core :as json]
             [cheshire.generate :as cg])
-  (:import (java.time LocalDate)
-           (com.fasterxml.jackson.core JsonGenerator)
-           (java.util UUID))
+  (:import (java.util UUID)
+           (java.time LocalDate)
+           (com.fasterxml.jackson.core JsonGenerator))
   (:gen-class))
 
 (defonce STATIC_INIT
@@ -67,12 +67,7 @@
 
     {:status 404 :body {:error "Route not found."}}))
 
-
-(def application
-  (-> route-handler
-      json-middleware
-      error-middleware))
-
+(def application (-> route-handler json-middleware error-middleware))
 
 (defn -main [& _]
   (let [ring-opts {:port 3000 :join? true}]

@@ -14,7 +14,8 @@
   (ByteArrayInputStream. (.getBytes s)))
 
 (defn valid-record? [x]
-  (= (set (conj (keys common/headers) :id)) (set (keys x))))
+  (= (set (keys common/attributes))
+     (disj (set (keys x)) :id)))
 
 (defn create-record [s]
   (application

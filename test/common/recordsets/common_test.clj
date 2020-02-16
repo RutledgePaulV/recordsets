@@ -13,7 +13,7 @@
     rows))
 
 (defn contains-all-fields? [record]
-  (and (= (set (keys headers)) (set (keys record)))
+  (and (= (set (keys attributes)) (set (keys record)))
        (every? some? (vals record))))
 
 (defn ascending? [coll]

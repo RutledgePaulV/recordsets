@@ -1,0 +1,14 @@
+Recordsets
+==========
+A CLI tool to read comma, pipe, or space separated files and print a sorted table of their entries.
+Rows should contain these values: LastName, FirstName, Gender, FavoriteColor, DOB (YYYY-MM-DD).
+
+Default action:
+
+  View a sorted table of the records contained in the files provided with the -f option.
+
+Auxiliary actions:
+
+  latest    - upgrade to the most recent version.
+  server    - start a REST server on port 3000.
+  uninstall - uninstall recordsets

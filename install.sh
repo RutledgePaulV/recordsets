@@ -19,9 +19,11 @@ set -e
 case "$1" in
   latest)
     git clone --depth=1 git@github.com:RutledgePaulV/recordsets.git recordsets && ./recordsets/install.sh && rm -rf recordsets
+    echo "recordsets successfully updated."
     ;;
   uninstall)
     rm -rf ~/.recordsets && rm -rf /usr/local/bin/recordsets
+    echo "recordsets successfully uninstalled."
     ;;
   server)
     java -jar ~/.recordsets/recordsets-server.jar $@
@@ -33,4 +35,3 @@ EOF
 
 chmod +x /usr/local/bin/recordsets
 echo "Created executable script for easy access at /usr/local/bin/recordsets"
-echo "You may run \`recordsets uninstall\` to remove all installed artifacts."
