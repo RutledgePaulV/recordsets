@@ -39,10 +39,9 @@
         fmt-string (strings/join "" (repeat (count cells) "%-15s"))]
     (apply format fmt-string cells)))
 
-(defn exit
-  ([] (exit ""))
-  ([msg] (exit msg 0))
-  ([msg status] (do (println msg) (flush) (System/exit status))))
+(defn exit [msg status]
+  (println msg)
+  (System/exit status))
 
 (defn read-source [source]
   (with-open [reader (io/reader source)]
@@ -52,7 +51,7 @@
   (let [{:keys [options errors summary]} (cli/parse-opts args cli-options)]
     (cond
       (:help options)
-      (exit (usage summary))
+      (exit (usage summary) 0)
       (not-empty errors)
       (exit (error-message errors) 1)
       :otherwise

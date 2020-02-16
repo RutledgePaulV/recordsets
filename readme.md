@@ -1,4 +1,6 @@
-
+[![Build Status](https://travis-ci.com/rutledgepaulv/recordsets.svg?branch=master)](https://travis-ci.com/rutledgepaulv/recordsets)
+[![codecov](https://codecov.io/gh/rutledgepaulv/recordsets/branch/master/graph/badge.svg)](https://codecov.io/gh/rutledgepaulv/recordsets)
+ 
 ### Installation
 
 I wrote an installation script that assumes you already have leiningen and a JDK on your path.
@@ -46,6 +48,8 @@ Potential improvements:
   sort reading from those to display the final results. This would remove
   any significant limits imposed by heap size and instead allow for 
   processing any file assuming you have enough free disk space.
+* If this were something real I'd probably accept input on stdin too since 
+  then it can be more easily composed with other cli tools.
 
 
 ### SERVER

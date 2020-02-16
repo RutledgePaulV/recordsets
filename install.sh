@@ -5,12 +5,12 @@ mkdir -p ~/.recordsets
 
 echo "Building cli uberjar."
 LEIN_SILENT=true lein build-cli
-cp target/recordsets-0.1.0-SNAPSHOT-standalone.jar ~/.recordsets/recordsets-cli.jar
+cp target/recordsets-cli.jar ~/.recordsets/recordsets-cli.jar
 echo "Installed cli uberjar at ~/.recordsets/recordsets-cli.jar"
 
 echo "Building server uberjar."
 LEIN_SILENT=true lein build-server
-cp target/recordsets-0.1.0-SNAPSHOT-standalone.jar ~/.recordsets/recordsets-server.jar
+cp target/recordsets-server.jar ~/.recordsets/recordsets-server.jar
 echo "Installed server uberjar at ~/.recordsets/recordsets-server.jar"
 
 cat <<'EOF' >/usr/local/bin/recordsets

@@ -34,7 +34,7 @@
   #(compare (key-fn %1) (key-fn %2)))
 
 (defn descending [key-fn]
-  #(compare (key-fn %1) (key-fn %2)))
+  #(compare (key-fn %2) (key-fn %1)))
 
 (def desc-by-last-name (descending :last-name))
 
@@ -47,5 +47,5 @@
     (into {} (for [[prop value]
                    (map vector (keys headers) (rest result))]
                [prop ((-> prop headers :input) value)]))
-    (let [message (format "Invalidly formatted row '%s'" line)]
+    (let [message (format "Invalidly row '%s'" line)]
       (throw (ex-info message {:status 400})))))
