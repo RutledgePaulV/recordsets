@@ -6,21 +6,20 @@
   (:gen-class))
 
 (def sort-options
-  {:birthdate common/asc-by-date-of-birth
-   :gender    common/asc-by-gender-and-last-name
-   :name      common/desc-by-last-name})
+  {"birthdate" common/asc-by-date-of-birth
+   "gender"    common/asc-by-gender-and-last-name
+   "name"      common/desc-by-last-name})
 
-(def csv-sort-options
-  (strings/join ", " (map name (keys sort-options))))
+(def sort-options-validation-msg
+  (str "Sort options: " (strings/join ", " (map name (keys sort-options)))))
 
 (def cli-options
   [["-f" "--files <files>"
-    :parse-fn #(set (strings/split % #","))
+    :parse-fn #(set (strings/split % #"\s*,\s*"))
     :default #{}]
-   ["-s" "--sort <sort>"
-    :parse-fn keyword
-    :default :name
-    :validate [sort-options (str "Sort options: " csv-sort-options)]]
+   ["-s" "--sort  <sort>"
+    :default "name"
+    :validate [sort-options sort-options-validation-msg]]
    ["-h" "--help"]])
 
 (defn usage [options-summary]
@@ -47,17 +46,18 @@
   (with-open [reader (io/reader source)]
     (mapv common/validate-and-parse-input-row (line-seq reader))))
 
+(defn process-files [files sort-key]
+  (try
+    (->> (mapcat read-source files)
+         (sort (sort-options sort-key))
+         (run! (comp println record->table-row)))
+    (catch Exception e
+      (exit (ex-message e) 1))))
+
 (defn -main [& args]
   (let [{:keys [options errors summary]} (cli/parse-opts args cli-options)]
     (cond
-      (:help options)
-      (exit (usage summary) 0)
-      (not-empty errors)
-      (exit (error-message errors) 1)
-      :otherwise
-      (try
-        (->> (mapcat read-source (:files options))
-             (sort (sort-options (:sort options)))
-             (run! (comp println record->table-row)))
-        (catch Exception e
-          (exit (ex-message e) 1))))))
+      (:help options) (exit (usage summary) 0)
+      (not-empty errors) (exit (error-message errors) 1)
+      (empty? (:files options)) (exit (usage summary) 1)
+      :otherwise (process-files (:files options) (:sort options)))))

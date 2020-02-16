@@ -25,13 +25,10 @@
     :uberjar-name "recordsets-server.jar"}
 
    :dev
-   [:cli
-    :server
-    {:source-paths ["repl"]
-     :repl-options {:init-ns user}}]
+   [:cli :server {:repl-options {:init-ns recordsets.common}}]
 
    :test
-   [:dev :server]
+   [:cli :server]
 
    :uberjar
    {:aot :all}}

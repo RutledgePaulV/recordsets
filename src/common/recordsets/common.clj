@@ -3,11 +3,17 @@
   (:import (java.time LocalDate)
            (java.time.format DateTimeFormatter)))
 
-(def parsing-regex
-  (let [word-term      "([^\\s\\,\\|]+)(?:\\s*\\|\\s*|\\s*,\\s*|\\s+)"
-        date-term      "(\\d{4}\\-\\d{2}-\\d{2})"
-        pattern-string (strings/join "" (flatten ["^" (repeat 4 word-term) date-term "$"]))]
-    (re-pattern pattern-string)))
+(def input-line-regex
+  (let [pad    "\\s*"
+        delim  "(?:\\||,|\\s+)"
+        pdelim (str pad delim pad)
+        word   "([^\\s\\,\\|]+)"
+        date   "(\\d{4}\\-\\d{2}-\\d{2})"
+        start  "^"
+        end    "$"]
+    (->> [start pad word pdelim word pdelim word pdelim word pdelim date pad end]
+         (apply str)
+         (re-pattern))))
 
 (def input-date-format
   DateTimeFormatter/ISO_DATE)
@@ -18,8 +24,14 @@
 (defn parse-date [date-string]
   (LocalDate/parse date-string input-date-format))
 
-(defn serialize-date [date-string]
-  (.format output-date-format date-string))
+(defn serialize-date [date]
+  (.format output-date-format date))
+
+(defn ascending-by [key-fn]
+  #(compare (key-fn %1) (key-fn %2)))
+
+(defn descending-by [key-fn]
+  #(compare (key-fn %2) (key-fn %1)))
 
 (def headers
   ; order intentional
@@ -30,20 +42,12 @@
     :favorite-color {:input strings/trim :output identity}
     :date-of-birth {:input parse-date :output serialize-date}))
 
-(defn ascending [key-fn]
-  #(compare (key-fn %1) (key-fn %2)))
-
-(defn descending [key-fn]
-  #(compare (key-fn %2) (key-fn %1)))
-
-(def desc-by-last-name (descending :last-name))
-
-(def asc-by-date-of-birth (ascending :date-of-birth))
-
-(def asc-by-gender-and-last-name (ascending (juxt :gender :last-name)))
+(def desc-by-last-name (descending-by (juxt :last-name :id)))
+(def asc-by-date-of-birth (ascending-by (juxt :date-of-birth :id)))
+(def asc-by-gender-and-last-name (ascending-by (juxt :gender :last-name :id)))
 
 (defn validate-and-parse-input-row [line]
-  (if-some [result (re-find parsing-regex line)]
+  (if-some [result (re-find input-line-regex line)]
     (into {} (for [[prop value]
                    (map vector (keys headers) (rest result))]
                [prop ((-> prop headers :input) value)]))

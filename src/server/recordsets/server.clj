@@ -2,18 +2,33 @@
   (:require [ring.adapter.jetty :as jetty]
             [recordsets.common :as common]
             [cheshire.core :as json]
-            [ring.util.response :as response])
+            [ring.util.response :as response]
+            [cheshire.generate :as cg])
+  (:import (java.time LocalDate)
+           (com.fasterxml.jackson.core JsonGenerator)
+           (java.util UUID))
   (:gen-class))
 
+(defonce STATIC_INIT
+  (cg/add-encoder LocalDate
+    (fn [date ^JsonGenerator json-generator]
+      (.writeString json-generator ^String (common/serialize-date date)))))
 
-(defonce db
-  (atom {:birthdate (sorted-set-by common/asc-by-date-of-birth)
-         :gender    (sorted-set-by common/asc-by-gender-and-last-name)
-         :name      (sorted-set-by common/desc-by-last-name)}))
+
+(defn initial-db []
+  {:birthdate (sorted-set-by common/asc-by-date-of-birth)
+   :gender    (sorted-set-by common/asc-by-gender-and-last-name)
+   :name      (sorted-set-by common/desc-by-last-name)})
+
+
+(defonce db (atom (initial-db)))
 
 
 (defn persist! [record]
-  (swap! db #(reduce-kv (fn [m k v] (assoc m k (conj v record))) {} %)))
+  (let [identifier     (str (UUID/randomUUID))
+        record-with-id (assoc record :id identifier)]
+    (swap! db #(reduce-kv (fn [m k v] (assoc m k (conj v record-with-id))) {} %))
+    record-with-id))
 
 
 (defn json-middleware [handler]
@@ -29,34 +44,34 @@
       (handler request)
       (catch Exception e
         (let [{:keys [message status]} (ex-data e)]
-          {:status (or status 500)
-           :body   {:error (or message (ex-message e))}})))))
+          (-> {:error (or message (ex-message e))}
+              (json/generate-string)
+              (response/response)
+              (response/status (or status 500))))))))
 
 
 (defn route-handler [{:keys [request-method uri body]}]
   (case [request-method uri]
 
     [:get "/records/gender"]
-    {:body (:gender @db)}
+    {:body (:gender @db) :status 200}
 
     [:get "/records/birthdate"]
-    {:body (:birthdate @db)}
+    {:body (:birthdate @db) :status 200}
 
     [:get "/records/name"]
-    {:body (:name @db)}
+    {:body (:name @db) :status 200}
 
     [:post "/records"]
-    (let [new-record (common/validate-and-parse-input-row (slurp body))]
-      (persist! new-record)
-      {:body new-record :status 201})
+    {:body (persist! (common/validate-and-parse-input-row (slurp body))) :status 201}
 
     {:status 404 :body {:error "Route not found."}}))
 
 
 (def application
   (-> route-handler
-      error-middleware
-      json-middleware))
+      json-middleware
+      error-middleware))
 
 
 (defn -main [& _]
