@@ -6,9 +6,7 @@
 I wrote an installation script that builds from source and assumes you already have leiningen and a JDK on your path.
 
 ```shell script
-git clone --depth=1 git@github.com:RutledgePaulV/recordsets.git recordsets \ 
-  && ./recordsets/install.sh \
-  && rm -rf recordsets
+git clone --depth=1 git@github.com:RutledgePaulV/recordsets.git recordsets && cd recordsets && ./install.sh && cd .. && rm -rf recordsets
 ```
 
 This will place a shell script on your path and copy the compiled uberjars

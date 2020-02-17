@@ -18,7 +18,7 @@ cat <<'EOF' >/usr/local/bin/recordsets
 set -e
 case "$1" in
   latest)
-    git clone --depth=1 git@github.com:RutledgePaulV/recordsets.git recordsets && ./recordsets/install.sh && rm -rf recordsets
+    git clone --depth=1 git@github.com:RutledgePaulV/recordsets.git recordsets && cd recordsets && ./install.sh && cd .. && rm -rf recordsets
     echo "recordsets successfully updated."
     ;;
   uninstall)
